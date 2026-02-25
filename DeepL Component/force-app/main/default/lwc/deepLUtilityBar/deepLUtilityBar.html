@@ -1,0 +1,125 @@
+<template>
+    <div class="container slds-p-around_medium">
+        <!-- Header / Pop-out -->
+        <div class="slds-grid slds-grid_align-spread slds-m-bottom_small">
+            <h1 class="slds-text-heading_small">DeepL Translator</h1>
+        </div>
+
+        <!-- Language Selection -->
+        <lightning-combobox
+            name="sourceLang"
+            label="Source Language"
+            value={sourceLang}
+            placeholder="Auto-detect"
+            options={sourceLangOptions}
+            onchange={handleSourceChange}
+            class="slds-m-bottom_x-small">
+        </lightning-combobox>
+
+        <lightning-combobox
+            name="targetLang"
+            label="Target Language"
+            value={targetLang}
+            placeholder="Select Target Language"
+            options={targetLangOptions}
+            onchange={handleTargetChange}
+            required
+            class="slds-m-bottom_small">
+        </lightning-combobox>
+
+        <!-- Dropdown to Select File from Salesforce -->
+        <lightning-combobox
+            label="Select File from Salesforce"
+            value={selectedFile}
+            options={fileOptions}
+            onchange={handleFileChange}>
+        </lightning-combobox>
+        
+        <lightning-button
+            label="Translate Selected File"
+            onclick={handleTranslateSelectedFile}
+            class="slds-m-top_small">
+        </lightning-button>
+
+        <br>
+
+        <!-- Tabs for Text vs File -->
+        <lightning-tabset variant="scoped">
+            
+            
+            <!-- Text Translation Tab -->
+            <lightning-tab label="Text">
+                <div class="slds-m-vertical_small">
+                    <!-- Formality Toggle -->
+                     <div class="slds-form-element slds-m-bottom_small">
+                        <label class="slds-form-element__label" for="formality">Formality</label>
+                        <div class="slds-form-element__control">
+                            <lightning-combobox
+                                name="formality"
+                                value={formality}
+                                options={formalityOptions}
+                                onchange={handleFormalityChange}
+                                variant="label-hidden">
+                            </lightning-combobox>
+                        </div>
+                    </div>
+
+                    <!-- Input Area -->
+                    <lightning-input-rich-text
+                        value={inputText}
+                        onchange={handleInputChange}
+                        placeholder="Enter text here..."
+                        share-with-entity-id={recordId}>
+                    </lightning-input-rich-text>
+
+                    <div class="slds-align_absolute-center slds-m-vertical_small">
+                        <lightning-button variant="brand" label="Translate" onclick={handleTranslateText} disabled={isTranslating}></lightning-button>
+                    </div>
+
+                    <!-- Output Area -->
+                    <template if:true={translatedText}>
+                        <div class="slds-box slds-theme_shade slds-m-top_small">
+                            <lightning-formatted-rich-text value={translatedText}></lightning-formatted-rich-text>
+                        </div>
+                         <div class="slds-text-align_right slds-m-top_x-small">
+                            <lightning-button-icon icon-name="utility:copy" variant="bare" onclick={handleCopy} alternative-text="Copy to Clipboard"></lightning-button-icon>
+                        </div>
+                    </template>
+                     <template if:true={error}>
+                        <div class="slds-text-color_error slds-m-top_small">{error}</div>
+                    </template>
+                </div>
+            </lightning-tab>
+
+            <!-- File Translation Tab -->
+            <lightning-tab label="File">
+                <div class="slds-m-vertical_small">
+                    <p class="slds-text-body_small slds-m-bottom_small">Supported formats: .docx, .pptx, .pdf, .txt</p>
+                    
+                    <lightning-file-upload
+                        label="Upload File to Translate"
+                        name="fileUploader"
+                        accept={acceptedFormats}
+                        record-id={userId}
+                        onuploadfinished={handleUploadFinished}>
+                    </lightning-file-upload>
+
+                    <template if:true={fileStatus}>
+                        <div class="slds-m-top_medium">
+                            <p><strong>Status:</strong> {fileStatus}</p>
+                            <template if:true={isFileProcessing}>
+                                <lightning-spinner alternative-text="Processing" size="small"></lightning-spinner>
+                            </template>
+                             <template if:true={downloadUrl}>
+                                <div class="slds-m-top_small">
+                                    <a href={downloadUrl} target="_blank">Download Translated File</a>
+                                </div>
+                            </template>
+                        </div>
+                    </template>
+                </div>
+            </lightning-tab>
+            
+        </lightning-tabset>
+    </div>
+</template>
